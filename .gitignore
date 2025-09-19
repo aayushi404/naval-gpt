@@ -1,0 +1,50 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+
+# Environment variables
+.env
+.env.*
+
+# VSCode config
+.vscode/
+
+# Mac & system files
+.DS_Store
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Logs & outputs
+*.log
+logs/
+output/
+*.sqlite3
+
+# Test artifacts
+.coverage
+htmlcov/
+.tox/
+.nox/
+.pytest_cache/
+*.cover
+
+# Pydantic cache
+__pydantic_cache__/
+
+# MyPy & other linters
+.mypy_cache/
+.dmypy.json
+.pyre/
+.pytype/
+
+# FastAPI + Uvicorn specific (if you're using reload)
+*.pid
