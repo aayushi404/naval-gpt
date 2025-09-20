@@ -1,8 +1,8 @@
 import time
 class RateLimiter:
     def __init__(self, requests_per_minute=60, requests_per_second=2):
-        self.request_per_minute = requests_per_minute
-        self.request_per_second = requests_per_second
+        self.requests_per_minute = requests_per_minute
+        self.requests_per_second = requests_per_second
         self.request_times = []
         self.last_request_time = 0
 
@@ -10,10 +10,10 @@ class RateLimiter:
         current_time = time.time()
 
         time_since_last = current_time - self.last_request_time
-        if time_since_last < (1.0/self.request_per_second):
-            sleep_time = (1.0/self.request_per_second) - time_since_last
+        if time_since_last < (1.0 / self.requests_per_second):
+            sleep_time = (1.0 / self.requests_per_second) - time_since_last
             time.sleep(sleep_time)
-        
+
         current_time = time.time()
         self.request_times = [t for t in self.request_times if current_time - t < 60]
 
