@@ -14,7 +14,7 @@ def get_quotes(search):
         quotes = [q.get_text(strip=True) for q in quotes_html]
         quotes = quotes[2:len(quotes) - 3]
         print(quotes[:3])
-        np.save(f'chunks/{search}_chunks.npy', quotes)
+        np.save(f'data/chunks/{search}_chunks.npy', quotes)
 
 if __name__ == "__main__":
     get_quotes("rich")

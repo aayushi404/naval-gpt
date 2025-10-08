@@ -1,4 +1,4 @@
-from rate_limiter import RateLimiter
+from app.rate_limiter import RateLimiter
 import numpy as np
 import sys
 import os
@@ -17,9 +17,9 @@ def getEmbedding(chunk:str, max_retries:int=3):
         try:
             rate_limiter.wait_if_needed()
 
-            url = f'{os.getenv("OPENAI_PROXY_BASE_URL")}/embeddings'
+            url = f'{os.getenv("OPENAI_BASE_URL")}/embeddings'
             headers = {
-                'Authorization': f'Bearer {os.getenv("OPENAI_PROXY_API_KEY")}',
+                'Authorization': f'Bearer {os.getenv("OPENAI_API_KEY")}',
                 'Content-Type': 'application/json'
             }
             payload = {
@@ -50,13 +50,13 @@ def run():
     if not chunk_file:
         print("please provide chunk file!")
         return
-    chunks_file_path = "chunks/" + chunk_file
+    chunks_file_path = "data/chunks/" + chunk_file
     if not os.path.exists(chunks_file_path):
         print("there is no chunk file!")
         return
 
-    remaining_chunk = np.load(f'chunks/{chunk_file}').tolist()
-    embedding_file_path = "embeddings/" + chunk_file.replace(".npy", ".npz")
+    remaining_chunk = np.load(chunks_file_path).tolist()
+    embedding_file_path = "data/embeddings/" + chunk_file.replace(".npy", ".npz")
     if os.path.exists(embedding_file_path):
         embeddings_data = np.load(embedding_file_path)
         all_embeddings = embeddings_data["embeddings"].tolist()
