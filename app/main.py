@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
 import numpy as np
-from app.rate_limiter import RateLimiter
+from .rate_limiter import RateLimiter
 import requests
 import time
 import json
@@ -53,7 +53,8 @@ def get_question_embedding(input_text:str, max_retries: int = 3) -> list[float]:
     raise Exception("Max retries excedded")
 
 def get_sys_prompt():
-    with open('data/prompts/sys_prompt.txt', 'r') as f:
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    with open(f'{BASE_DIR}/data/prompts/sys_prompt.txt', 'r') as f:
         sys_prompt = f.read()
 
     return sys_prompt
@@ -85,12 +86,15 @@ def get_llm_response(context:str, question:str):
         raise Exception(str(e))
 
 def load_files():
-    entries = os.listdir("data/embeddings/")
-    embedding_files = [f for f in entries if os.path.isfile(os.path.join("data/embeddings/", f))]
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    entries = os.listdir(os.path.join(BASE_DIR, "data", "embeddings"))
+    print(entries)
+    embedding_files = [f for f in entries if os.path.isfile(os.path.join(BASE_DIR,"data/embeddings/", f))]
+    print(embedding_files)
     embeddings = []
     chunks = []
     for f in embedding_files:
-        data = np.load("data/embeddings/"+f)
+        data = np.load(os.path.join(BASE_DIR,"data/embeddings/", f))
         embeddings.extend(data['embeddings'])
         chunks.extend(data['chunks'])
     return embeddings, chunks
