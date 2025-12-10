@@ -1,4 +1,5 @@
 from rate_limiter import RateLimiter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 import numpy as np
 import sys
 import os
@@ -6,8 +7,39 @@ from tqdm import tqdm
 import requests
 import time
 from dotenv import load_dotenv
+from scrape import scrape, store_chunks
+from langchain_postgres import PGEngine, PGVectorStore
+from langchain_openai import OpenAIEmbeddings
 
 load_dotenv()
+
+def run2(topics):
+    documents = scrape(topics)
+    print(f'scraped {len(documents)} documents')
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=500,
+        chunk_overlap=50,
+        separators=["\n\n", "\n", " ", ""]
+    )
+    chunks = text_splitter.split_documents(documents)
+    print(f"Total chunsks created: {len(chunks)}")
+    print(chunks[:5])
+
+    embeddings_model = OpenAIEmbeddings('text-embedding-3-small')
+
+    DATABASE_STRING = os.getenv("POSTGRES_DATABASE")
+
+    pg_engine = PGEngine.from_connection_string(DATABASE_STRING)
+
+    vector_store = PGVectorStore(
+        engine=pg_engine,
+        table="naval",
+        embedding_service=embeddings_model
+    )
+
+    vector_store.add_documents(chunks)
+
+
 
 rate_limiter = RateLimiter(requests_per_minute=5, requests_per_second=1)
 
@@ -45,19 +77,16 @@ def getEmbedding(chunk:str, max_retries:int=3):
 
     raise Exception("Max retries excedded")
 
-def run():
+def run(topics):
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    chunk_file = sys.argv[1]
-    if not chunk_file:
-        print("please provide chunk file!")
-        return
-    chunks_file_path = f"{BASE_DIR}/data/chunks/" + chunk_file
+    store_chunks(topics)
+    chunks_file_path = f"{BASE_DIR}/data/chunks.npy"
     if not os.path.exists(chunks_file_path):
         print("there is no chunk file!")
         return
 
     remaining_chunk = np.load(chunks_file_path).tolist()
-    embedding_file_path = BASE_DIR + "/data/embeddings/" + chunk_file.replace(".npy", ".npz")
+    embedding_file_path = BASE_DIR + "/data/" + "embeddings.npz"
     if os.path.exists(embedding_file_path):
         embeddings_data = np.load(embedding_file_path)
         all_embeddings = embeddings_data["embeddings"].tolist()
@@ -90,6 +119,11 @@ def run():
         np.save(chunks_file_path, remaining_chunk[chunks_to_process:])
         np.savez(embedding_file_path, embeddings=all_embeddings, chunks=processed_chunks)
         print(f'{len(remaining_chunk) - chunks_to_process} remaining to process')
+
 if __name__ == "__main__":
     load_dotenv()
-    run()
+    #Only if you have money to invest in openai api
+    #run2(["rich"])
+
+    #By using proxy api key
+    run(["rich"])
