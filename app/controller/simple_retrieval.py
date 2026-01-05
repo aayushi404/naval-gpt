@@ -3,7 +3,7 @@ import json
 import requests
 from dotenv import load_dotenv
 
-from app.services.retrieve import get_chunks
+from ..services.retrieve import get_chunks
 
 load_dotenv()
 

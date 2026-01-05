@@ -2,7 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
-from app.controller import simple_retrieval
+from .controller.agentic_retrieval import agentic_retrieval
+from .controller.simple_retrieval import simple_retrieval
 load_dotenv()
 app = FastAPI()
 
@@ -27,7 +28,9 @@ async def talk(input:str):
 @app.get('/api/agent/talk')
 async def answer(input:str):
     try:
-        pass
+        print()
+        answer = agentic_retrieval(input)
+        return{"message":answer}
     except Exception as e:
         return {"error": str(e)}
 
